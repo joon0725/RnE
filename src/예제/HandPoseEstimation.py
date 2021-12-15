@@ -8,7 +8,7 @@ hand_list = []
 cap = cv2.VideoCapture(0)
 cnt = 0
 
-with mp_hands.Hands(min_detection_confidence=0.8, min_tracking_confidence=0.5) as hands:
+with mp_hands.Hands(min_detection_confidence=0.8, min_tracking_confidence=0.5, max_num_hands=4) as hands:
     while cap.isOpened():
         ret, frame = cap.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -18,11 +18,15 @@ with mp_hands.Hands(min_detection_confidence=0.8, min_tracking_confidence=0.5) a
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         if results.multi_hand_landmarks:
             for num, hand in enumerate(results.multi_hand_landmarks):
+                if not cnt % 25:
+                    print(hand.landmark[0].x)
+                    print(hand.landmark[0].y)
+                    print(hand.landmark[0].z)
                 mp_drawing.draw_landmarks(image, hand, mp_hands.HAND_CONNECTIONS)
 
         cv2.imshow("Hand Tracking", image)
         if cv2.waitKey(10) == ord('q'):
             break
-
+        cnt += 1
 cap.release()
 cv2.destroyAllWindows()
