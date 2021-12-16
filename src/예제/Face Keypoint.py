@@ -1,95 +1,48 @@
-# Facial landmarks with dlib, OpenCV, and PythonPython
-
-# import the necessary packages
-from imutils import face_utils
-import numpy as np
+import mediapipe as mp
 import imutils
-import dlib
 import cv2
 
+mp_drawing = mp.solutions.drawing_utils
+mp_holistic = mp.solutions.holistic
+face_landmarks = []
+left_landmarks = []
+right_landmarks = []
+cap = cv2.VideoCapture(0)
+cnt = 0
+with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
+    while cap.isOpened():
+        ret, frame = cap.read()
+        frame = imutils.resize(frame, width=1024)
+        image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = holistic.process(image)
+        if results is not None:
+            if cnt % 25 == 0:
+                face_landmarks.append(results.face_landmarks.landmark)
+                right_landmarks.append(results.right_hand_landmarks.landmark)
+                left_landmarks.append(results.left_hand_landmarks.landmark)
+                print(mp_holistic.FACEMESH_CONTOURS)
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            mp_drawing.draw_landmarks(image, results.left_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+            mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS)
+            mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS,
+                                      mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
+                                      mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1))
+        cv2.imshow('Holistic Model Detection', image)
+        if cv2.waitKey(10) & 0xFF == ord('q'):
+            break
+        cnt += 1
+face_landmarks = [*map(lambda i: [*map(lambda a: {"x": a.x, "y": a.y, "z": a.z}, i)], face_landmarks)]
+left_landmarks = [*map(lambda i: [*map(lambda a: {'x': a.x, 'y': a.y, 'z': a.z}, i)], left_landmarks)]
+right_landmarks = [*map(lambda i: [*map(lambda a: {'x': a.x, 'y': a.y, 'z': a.z}, i)], right_landmarks)]
+a = []
+for n, i in enumerate(face_landmarks):
+    a.append([])
+    for j in [0, 7, 10, 13, 14, 17, 21, 33, 37, 39, 40, 46, 52, 53, 54, 55, 58, 61, 63, 65, 66, 67, 70, 78, 80, 81, 82, 84, 87, 88, 91, 93, 95, 103, 105, 107, 109, 127, 132, 133, 136, 144, 145, 146, 148, 149, 150, 152, 153, 154, 155, 157, 158, 159, 160, 161, 162, 163, 172, 173, 176, 178, 181, 185, 191, 234, 246, 249, 251, 263, 267, 269, 270, 276, 282, 283, 284, 285, 288, 291, 293, 295, 296, 297, 300, 308, 310, 311, 312, 314, 317, 318, 321, 323, 324, 332, 334, 336, 338, 356, 361, 362, 365, 373, 374, 375, 377, 378, 379, 380, 381, 382, 384, 385, 386, 387, 388, 389, 390, 397, 398, 400, 402, 405, 409, 415, 454, 466]:
+        a[n].append(i[j])
 
-def show_raw_detection(image, detector, predictor):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # detect faces in the grayscale image
-    rects = detector(gray, 1)
-
-    # loop over the face detections
-    for (i, rect) in enumerate(rects):
-        # determine the facial landmarks for the face region, then
-        # convert the facial landmark (x, y)-coordinates to a NumPy
-        # array
-        shape = predictor(gray, rect)
-        shape = face_utils.shape_to_np(shape)
-
-        # convert dlib's rectangle to a OpenCV-style bounding box
-        # [i.e., (x, y, w, h)], then draw the face bounding box
-        (x, y, w, h) = face_utils.rect_to_bb(rect)
-        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-        # show the face number
-        cv2.putText(image, "Face #{}".format(i + 1), (x - 10, y - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-
-        # loop over the (x, y)-coordinates for the facial landmarks
-        # and draw them on the image
-        for (x, y) in shape:
-            cv2.circle(image, (x, y), 1, (0, 0, 255), -1)
-
-    # show the output image with the face detections + facial landmarks
-    cv2.imshow("Output", image)
-    cv2.waitKey(0)
-
-
-def draw_individual_detections(image, detector, predictor):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # detect faces in the grayscale image
-    rects = detector(gray, 1)
-
-    # loop over the face detections
-    for (i, rect) in enumerate(rects):
-        # determine the facial landmarks for the face region, then
-        # convert the landmark (x, y)-coordinates to a NumPy array
-        shape = predictor(gray, rect)
-        shape = face_utils.shape_to_np(shape)
-
-        # loop over the face parts individually
-        for (name, (i, j)) in face_utils.FACIAL_LANDMARKS_IDXS.items():
-            # clone the original image so we can draw on it, then
-            # display the name of the face part on the image
-            clone = image.copy()
-            cv2.putText(clone, name, (10, 30), cv2.FONT_HERSHEY_SIMPLEX,
-                        0.7, (0, 0, 255), 2)
-
-            # loop over the subset of facial landmarks, drawing the
-            # specific face part
-            for (x, y) in shape[i:j]:
-                cv2.circle(clone, (x, y), 1, (0, 0, 255), -1)
-
-            # extract the ROI of the face region as a separate image
-            (x, y, w, h) = cv2.boundingRect(np.array([shape[i:j]]))
-            roi = image[y:y + h, x:x + w]
-            roi = imutils.resize(roi, width=250, inter=cv2.INTER_CUBIC)
-
-            # show the particular face part
-            cv2.imshow("ROI", roi)
-            cv2.imshow("Image", clone)
-            cv2.waitKey(0)
-
-        # visualize all facial landmarks with a transparent overlay
-        output = face_utils.visualize_facial_landmarks(image, shape)
-        cv2.imshow("Image", output)
-        cv2.waitKey(0)
-
-
-# initialize dlib's face detector (HOG-based) and then create
-# the facial landmark predictor
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
-
-# load the input image, resize it, and convert it to grayscale
-image = cv2.imread('image/tonystark.jpg')
-image = imutils.resize(image, width=500)
-show_raw_detection(image, detector, predictor)
-draw_individual_detections(image, detector, predictor)
+delta_face_landmarks = [[((a[n][j]['x']-a[n-1][j]['x'])**2 + (a[n][j]['y']-a[n-1][j]['y'])**2 + (a[n][j]['z']-a[n-1][j]['z'])**2)**(1/2) for j in range(1, len(a[n]))] for n in range(1, len(a))]
+delta_left_landmarks = [[((left_landmarks[n][j]['x']-left_landmarks[n-1][j]['x'])**2 + (left_landmarks[n][j]['y']-left_landmarks[n-1][j]['y'])**2 + (left_landmarks[n][j]['z']-left_landmarks[n-1][j]['z'])**2)**(1/2) for j in range(1, len(left_landmarks[n]))] for n in range(1, len(left_landmarks))]
+delta_right_landmarks = [[((a[n][j]['x']-a[n-1][j]['x'])**2 + (a[n][j]['y']-a[n-1][j]['y'])**2 + (a[n][j]['z']-a[n-1][j]['z'])**2)**(1/2) for j in range(1, len(a[n]))] for n in range(1, len(a))]
+cap.release()
+cv2.destroyAllWindows()
+print(delta_landmarks[0])
