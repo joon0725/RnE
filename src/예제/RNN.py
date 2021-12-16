@@ -1,7 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
+import Keypoints
+import numpy as np
 
-num_classes = 4
-input_size =
+a, b, c = map(torch.tensor, Keypoints.getkey_from_cam())
+data = torch.cat([a, b, c], dim=1)
+print(data.shape)
