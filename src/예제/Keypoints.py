@@ -91,9 +91,9 @@ def getkey_from_vid(path):
                 mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS,
                                           mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
                                           mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1))
-            cv2.imshow('Holistic Model Detection', image)
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                break
+            # # cv2.imshow('Holistic Model Detection', image)
+            # if cv2.waitKey(10) & 0xFF == ord('q'):
+            #     break
             cnt += 1
     face_landmarks = [*map(lambda i: [*map(lambda a: {"x": a.x, "y": a.y, "z": a.z}, i)], face_landmarks)]
     left_landmarks = [*map(lambda i: [*map(lambda a: {'x': a.x, 'y': a.y, 'z': a.z}, i)], left_landmarks)]
@@ -112,15 +112,15 @@ def getkey_from_vid(path):
     delta_face_landmarks = [[((a[n][j]['x'] - a[n - 1][j]['x']) ** 2 + (a[n][j]['y'] - a[n - 1][j]['y']) ** 2 +
                               (a[n][j]['z'] - a[n - 1][j]['z']) ** 2) ** (1 / 2) for j in range(1, len(a[n]))] for n in
                             range(1, len(a))]
-    print(len(delta_face_landmarks[0]))
+    # print(len(delta_face_landmarks[0]))
     delta_left_landmarks = [[((left_landmarks[n][j]['x'] - left_landmarks[n - 1][j]['x']) ** 2 + (
             left_landmarks[n][j]['y'] - left_landmarks[n - 1][j]['y']) ** 2 + (
                                       left_landmarks[n][j]['z'] - left_landmarks[n - 1][j]['z']) ** 2) ** (1 / 2) for j
                              in range(1, len(left_landmarks[n]))] for n in range(1, len(left_landmarks))]
-    print(len(delta_left_landmarks[0]))
+    # print(len(delta_left_landmarks[0]))
     delta_right_landmarks = [[((right_landmarks[n][j]['x'] - right_landmarks[n - 1][j]['x']) ** 2 + (right_landmarks[n][j]['y'] - right_landmarks[n - 1][j]['y']) ** 2 + (
             right_landmarks[n][j]['z'] - right_landmarks[n - 1][j]['z']) ** 2) ** (1 / 2) for j in range(1, len(right_landmarks[n]))] for n in range(1, len(right_landmarks))]
-    print(len(delta_right_landmarks[0]))
+    # print(len(delta_right_landmarks[0]))
     cap.release()
     cv2.destroyAllWindows()
     return delta_face_landmarks, delta_left_landmarks, delta_right_landmarks
