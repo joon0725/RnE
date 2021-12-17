@@ -91,9 +91,9 @@ def getkey_from_vid(path):
                 mp_drawing.draw_landmarks(image, results.face_landmarks, mp_holistic.FACEMESH_CONTOURS,
                                           mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
                                           mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1))
-            # # cv2.imshow('Holistic Model Detection', image)
-            # if cv2.waitKey(10) & 0xFF == ord('q'):
-            #     break
+            cv2.imshow('Holistic Model Detection', image)
+            if cv2.waitKey(10) & 0xFF == ord('q'):
+                break
             cnt += 1
     face_landmarks = [*map(lambda i: [*map(lambda a: {"x": a.x, "y": a.y, "z": a.z}, i)], face_landmarks)]
     left_landmarks = [*map(lambda i: [*map(lambda a: {'x': a.x, 'y': a.y, 'z': a.z}, i)], left_landmarks)]
