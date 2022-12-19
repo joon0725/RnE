@@ -112,15 +112,12 @@ def getkey_from_vid(path):
     delta_face_landmarks = [[((a[n][j]['x'] - a[n - 1][j]['x']) ** 2 + (a[n][j]['y'] - a[n - 1][j]['y']) ** 2 +
                               (a[n][j]['z'] - a[n - 1][j]['z']) ** 2) ** (1 / 2) for j in range(1, len(a[n]))] for n in
                             range(1, len(a))]
-    # print(len(delta_face_landmarks[0]))
     delta_left_landmarks = [[((left_landmarks[n][j]['x'] - left_landmarks[n - 1][j]['x']) ** 2 + (
             left_landmarks[n][j]['y'] - left_landmarks[n - 1][j]['y']) ** 2 + (
                                       left_landmarks[n][j]['z'] - left_landmarks[n - 1][j]['z']) ** 2) ** (1 / 2) for j
                              in range(1, len(left_landmarks[n]))] for n in range(1, len(left_landmarks))]
-    # print(len(delta_left_landmarks[0]))
     delta_right_landmarks = [[((right_landmarks[n][j]['x'] - right_landmarks[n - 1][j]['x']) ** 2 + (right_landmarks[n][j]['y'] - right_landmarks[n - 1][j]['y']) ** 2 + (
             right_landmarks[n][j]['z'] - right_landmarks[n - 1][j]['z']) ** 2) ** (1 / 2) for j in range(1, len(right_landmarks[n]))] for n in range(1, len(right_landmarks))]
-    # print(len(delta_right_landmarks[0]))
     cap.release()
     cv2.destroyAllWindows()
     return delta_face_landmarks, delta_left_landmarks, delta_right_landmarks
