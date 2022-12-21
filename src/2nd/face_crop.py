@@ -5,9 +5,9 @@ mp_face_detection = mp.solutions.face_detection
 mp_drawing = mp.solutions.drawing_utils
 
 label = ['eat', 'eat_question', 'know', 'know_qustion', 'want', 'want_question']
-i = 0
 for k in label:
     cap = cv2.VideoCapture(f"../{k}.mp4")
+    i = 0
     if cap.isOpened():
         while True:
             i += 1
